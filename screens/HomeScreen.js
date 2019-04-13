@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Animated,
-  View,
-  Modal,
-} from 'react-native';
+import { StyleSheet, Animated, View, Modal, AppState } from 'react-native';
 import { Brightness } from 'expo';
 import { PinchGestureHandler, State } from 'react-native-gesture-handler';
 import { lightColor } from '../constants/Colors';
@@ -13,13 +8,17 @@ import SettingsScreen from './SettingsScreen';
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
+    this.systemBrightness = null;
+    this.state = {
+      modalVisible: false,
+      lightColor: lightColor.beige,
+      brightness: 0.4,
+    }
     this.setModalVisible = this.setModalVisible.bind(this);
     this.setLightColor = this.setLightColor.bind(this);
+    this.setBrightness = this.setBrightness.bind(this);
   }
-  state = {
-    modalVisible: false,
-    lightColor: lightColor.beige,
-  };
+  ;
 
   setModalVisible(visible) {
     this.setState({modalVisible: visible});
@@ -27,6 +26,10 @@ export default class HomeScreen extends React.Component {
 
   setLightColor(color){
     this.setState({lightColor: color});
+  }
+
+  setBrightness(brightness){
+    this.setState({brightness: brightness});
   }
 
   _baseScale = new Animated.Value(1);
@@ -50,11 +53,22 @@ export default class HomeScreen extends React.Component {
   };
 
   componentDidMount(){
-    const bright = Brightness.getBrightnessAsync()
-    console.log('bright',bright);
-    // Brightness.setBrightnessAsync(1);
+    AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        Brightness.setBrightnessAsync(this.state.brightness);
+      } else if(state === 'inactive') {
+        Brightness.setBrightnessAsync(this.systemBrightness);
+      }
+    });
+
+    Brightness.getBrightnessAsync()
+      .then(brightness => {
+        if (!this.systemBrightness) {
+          this.systemBrightness = brightness;
+        }
+        this.setBrightness(brightness)
+      });
   }
-  
 
   render() {
     return (
@@ -68,7 +82,11 @@ export default class HomeScreen extends React.Component {
             visible={this.state.modalVisible}
             >
             <View>
-              <SettingsScreen setModalVisible={this.setModalVisible} setLightColor={this.setLightColor}></SettingsScreen>
+              <SettingsScreen
+                state={this.state}
+                setModalVisible={this.setModalVisible} 
+                setLightColor={this.setLightColor}
+                setBrightness={this.setBrightness}></SettingsScreen>
             </View>
           </Modal>
         </Animated.View>
@@ -81,11 +99,4 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  showModal:{
-    marginTop:200
-  },
-  hideModal:{
-    marginTop:200,
-    marginLeft:100
-  }
 });

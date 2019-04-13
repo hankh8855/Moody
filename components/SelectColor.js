@@ -12,6 +12,7 @@ export default class SelectColor extends React.Component {
         flex:1,
         flexDirection:'row',
         justifyContent:'space-around',
+        flexWrap: 'wrap',
         }}>
         {
           Object.values(lightColor).map((color,i) => 
@@ -34,7 +35,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderColor:'black',
     borderWidth: 0.2,
-    height: 40,
-    width: 40,
+    height: 50,
+    width: 50,
   }
 })

@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import SelectColor from '../components/SelectColor';
 import Layout from '../constants/Layout';
 import { PinchGestureHandler, State } from 'react-native-gesture-handler';
-import Slider from '@react-native-community/slider';
+import { Brightness } from 'expo';
+import Slider from "react-native-slider";
 
 export default class SettingsScreen extends React.Component {
   constructor(props) {
@@ -29,6 +30,7 @@ export default class SettingsScreen extends React.Component {
       this._pinchScale.setValue(1);
     }
   };
+
   render() {
     return (
       <PinchGestureHandler
@@ -39,13 +41,18 @@ export default class SettingsScreen extends React.Component {
           <View style={styles.locateColors}>
             <SelectColor setLightColor={this.props.setLightColor}/>
           </View>
-          <Slider
-            style={{width: 200, height: 40}}
-            minimumValue={0}
-            maximumValue={1}
-            minimumTrackTintColor="#FFFFFF"
-            maximumTrackTintColor="#000000"
-          />
+          <View style={styles.sliderContainer}>
+            <Slider
+              value={this.props.state.brightness}
+              minimumValue={0.1}
+              maximumValue={1}
+              minimumTrackTintColor={'blue'}
+              thumbTintColor={'blue'}
+              animationType={'spring'}
+              onValueChange={brightness => Brightness.setBrightnessAsync(brightness)}
+              onSlidingComplete={brightness => this.props.setBrightness(brightness)}
+            />
+          </View>
         </Animated.View>
       </PinchGestureHandler>
     );
@@ -53,17 +60,6 @@ export default class SettingsScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  title:{
-    textAlign: 'center',
-    marginTop: 40,
-    fontSize: 40,
-  },
-  locateColors : {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginBottom: 30,
-  },
   overlay: {
     flex: 1,
     position: 'absolute',
@@ -72,5 +68,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     width: Layout.window.width,
     height: Layout.window.height,
-  }  
+  },
+  title:{
+    flex: 0.1,
+    textAlign: 'center',
+    marginTop: 40,
+    fontSize: 40,
+  },
+  locateColors : {
+    flex: 0.8,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  sliderContainer:{
+    flex: 0.1,
+    marginLeft: 10,
+    marginRight: 10,
+    marginBottom: 20,
+    alignItems: "stretch",
+    justifyContent: "center",
+  }
 })
