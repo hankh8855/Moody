@@ -4,22 +4,27 @@ import { Brightness } from 'expo';
 import { PinchGestureHandler, State } from 'react-native-gesture-handler';
 import { lightColor } from '../constants/Colors';
 import SettingsScreen from './SettingsScreen';
+import ManualScreen from './ManualScreen';
 
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.systemBrightness = null;
     this.state = {
+      manualOnOff: true,
       modalVisible: false,
       lightColor: lightColor.beige,
       brightness: 0.4,
     }
+    this.setManualOnOff = this.setManualOnOff.bind(this);
     this.setModalVisible = this.setModalVisible.bind(this);
     this.setLightColor = this.setLightColor.bind(this);
     this.setBrightness = this.setBrightness.bind(this);
   }
-  ;
 
+  setManualOnOff(onOff) {
+    this.setState({manualOnOff: onOff});
+  }
   setModalVisible(visible) {
     this.setState({modalVisible: visible});
   }
@@ -71,25 +76,29 @@ export default class HomeScreen extends React.Component {
   }
 
   render() {
+    const {manualOnOff, modalVisible, lightColor, brightness} = this.state;
     return (
       <PinchGestureHandler
         onGestureEvent={this._onPinchGestureEvent}
         onHandlerStateChange={this._onPinchHandlerStateChange}>
-        <Animated.View style={{...styles.container, backgroundColor:this.state.lightColor}} collapsable={false}>
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={this.state.modalVisible}
-            >
-            <View>
-              <SettingsScreen
-                state={this.state}
-                setModalVisible={this.setModalVisible} 
-                setLightColor={this.setLightColor}
-                setBrightness={this.setBrightness}></SettingsScreen>
-            </View>
-          </Modal>
-        </Animated.View>
+        {manualOnOff ? 
+          (<ManualScreen setManualOnOff={this.setManualOnOff} />) : 
+          (<Animated.View style={{...styles.container, backgroundColor:lightColor}} collapsable={false}>
+              <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                >
+                <View>
+                  <SettingsScreen
+                    state={this.state}
+                    setModalVisible={this.setModalVisible} 
+                    setLightColor={this.setLightColor}
+                    setBrightness={this.setBrightness}></SettingsScreen>
+                </View>
+              </Modal>
+            </Animated.View>)
+        }
       </PinchGestureHandler>
     );
   }
